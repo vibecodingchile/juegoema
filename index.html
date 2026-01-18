@@ -9,7 +9,14 @@
     body { margin: 0; background:#0f1220; color:#e9ecff; display:grid; place-items:center; min-height:100vh; }
     .wrap { width:min(900px, 96vw); display:grid; gap:12px; }
     .top { display:flex; gap:12px; align-items:stretch; flex-wrap:wrap; }
-    canvas { background:#141a33; border:1px solid #2a3160; border-radius:14px; width:100%; height:auto; }
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:10px 0;">
+  <button class="btn" id="up">⬆️</button>
+  <button class="btn" id="left">⬅️</button>
+  <button class="btn" id="down">⬇️</button>
+  <button class="btn" id="right">➡️</button>
+  <button class="btn" id="act">E</button>
+</div>
+ canvas { background:#141a33; border:1px solid #2a3160; border-radius:14px; width:100%; height:auto; }
     .panel {
       flex: 1 1 280px;
       background:#141a33;
