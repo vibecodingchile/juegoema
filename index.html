@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mundo Virtual de Eva</title>
+
+  <style>
+    :root { font-family: system-ui, Arial, sans-serif; }
+
+    body {
+      margin: 0;
+      background:#0f1220;
+      color:#e9ecff;
+      display:grid;
+      place-items:center;
+      min-height:100vh;
+    }
+
+    .wrap {
+      width:min(900px, 96vw);
+      display:grid;
+      gap:12px;
+    }
+
+    .top {
+      display:flex;
+      gap:12px;
+      align-items:stretch;
+      flex-wrap:wrap;
+    }
+
+    canvas {
+      background:#141a33;
+      border:1px solid #2a3160;
+      border-radius:14px;
+      width:100%;
+      height:auto;
+    }
+
+    .panel {
+      flex: 1 1 280px;
+      background:#141a33;
+      border:1px solid #2a3160;
+      border-radius:14px;
+      padding:12px;
+      min-height: 160px;
+    }
+
+    .row {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .badge {
+      padding:4px 10px;
+      border-radius:999px;
+      background:#1e2550;
+      border:1px solid #2a3160;
+      font-size:12px;
+    }
+
+    .btn {
+      cursor:pointer;
+      border:1px solid #2a3160;
+      background:#1e2550;
+      color:#e9ecff;
+      padding:8px 12px;
+      border-radius:10px;
+      font-weight:600;
+    }
+
+    .log {
+      margin-top:10px;
+      font-size:14px;
+      max-height:200px;
+      overflow:auto;
+    }
+
+    .inv {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+
+    .chip {
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#10163a;
+      border:1px solid #2a3160;
+    }
+
+    .title {
+      font-size:18px;
+      font-weight:800;
+      margin:0 0 6px 0;
+    }
+
+    .controls {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+      margin:10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="panel">
+        <p class="title">🌍 Mundo Virtual de Eva</p>
+
+        <div class="row">
+          <span class="badge">Mover: WASD / Flechas</span>
+          <span class="badge">Interactuar: E</span>
+          <span class="badge">Objetivo: 🏆 Tesoro</span>
+        </div>
+
+        <div class="inv" id="inv"></div>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+
+    <!-- BOTONES PARA MÓVIL -->
+    <div class="controls">
+      <button class="btn" id="up">⬆️</button>
+      <button class="btn" id="left">⬅️</button>
+      <button class="btn" id="down">⬇️</button>
+      <button class="btn" id="right">➡️</button>
+      <button class="btn" id="act">E</button>
+    </div>
+
+    <canvas id="game" width="900" height="520"></canvas>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  const logEl = document.getElementById("log");
+  const invEl = document.getElementById("inv");
+
+  const TILE = 40;
+
+  const world = [
+    "1111111111111111111111",
+    "1....................1",
+    "1....111.............1",
+    "1....1...............1",
+    "1....1...........444.1",
+    "1....1...........4...1",
+    "1................444.1",
+    "1....................1",
+    "1....................1",
+    "1...............🏆....1",
+    "1....................1",
+    "1111111111111111111111"
+  ];
+
+  let player = { x: 2, y: 2 };
+  let inventory = [];
+
+  function log(msg) {
+    const d = document.createElement("div");
+    d.textContent = msg;
+    logEl.prepend(d);
+  }
+
+  function renderInventory() {
+    invEl.innerHTML = "<span class='badge'>🎒 Inventario</span>";
+    if (inventory.length === 0) {
+      invEl.innerHTML += "<span class='chip'>(vacío)</span>";
+    } else {
+      inventory.forEach(i => {
+        invEl.innerHTML += `<span class="chip">${i}</span>`;
+      });
+    }
+  }
+
+  function move(dx, dy) {
+    const nx = player.x + dx;
+    const ny = player.y + dy;
+    if (world[ny][nx] !== "1") {
+      player.x = nx;
+      player.y = ny;
+    }
+  }
+
+  function interact() {
+    if (player.x === 15 && player.y === 9) {
+      log("🏆 ¡Ganaste el tesoro! 🎉");
+    } else {
+      log("No hay nada aquí.");
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    for (let y=0;y<world.length;y++) {
+      for (let x=0;x<world[y].length;x++) {
+        ctx.fillStyle = world[y][x]==="1" ? "#0f3b2e" : "#1a2150";
+        ctx.fillRect(x*TILE, y*TILE, TILE-1, TILE-1);
+      }
+    }
+
+    ctx.font = "24px serif";
+    ctx.fillText("🧍", player.x*TILE+8, player.y*TILE+30);
+  }
+
+  // teclado
+  window.addEventListener("keydown", e => {
+    if (e.key==="w"||e.key==="ArrowUp") move(0,-1);
+    if (e.key==="s"||e.key==="ArrowDown") move(0,1);
+    if (e.key==="a"||e.key==="ArrowLeft") move(-1,0);
+    if (e.key==="d"||e.key==="ArrowRight") move(1,0);
+    if (e.key==="e") interact();
+  });
+
+  // botones móvil
+  document.getElementById("up").onclick = ()=>move(0,-1);
+  document.getElementById("down").onclick = ()=>move(0,1);
+  document.getElementById("left").onclick = ()=>move(-1,0);
+  document.getElementById("right").onclick = ()=>move(1,0);
+  document.getElementById("act").onclick = interact;
+
+  function loop(){
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  log("Bienvenida al mundo virtual ✨");
+  renderInventory();
+  loop();
+})();
+</script>
+</body>
+            </html>
